@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "./SimpleGovernance.sol";
+import "hardhat/console.sol";
 
 /**
  * @title SelfiePool
@@ -52,7 +53,8 @@ contract SelfiePool is ReentrancyGuard {
     function drainAllFunds(address receiver) external onlyGovernance {
         uint256 amount = token.balanceOf(address(this));
         token.transfer(receiver, amount);
-        
+        console.log('receiver', receiver);
+        console.log('amount', amount);
         emit FundsDrained(receiver, amount);
     }
 }

