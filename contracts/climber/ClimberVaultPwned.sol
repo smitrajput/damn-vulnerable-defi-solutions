@@ -10,8 +10,8 @@ import "./ClimberTimelock.sol";
 
 /**
  * @title ClimberVaultPwned
- * @dev To be deployed behind a proxy following the UUPS pattern. Upgrades are to be triggered by the owner.
- * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
+ * @dev Malicious vault to send all DVTs to attacker
+ * @author your boi
  */
 contract ClimberVaultPwned is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
@@ -24,7 +24,7 @@ contract ClimberVaultPwned is Initializable, OwnableUpgradeable, UUPSUpgradeable
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    /* unable to call initialize() during upgradeToAndCall(), hence had 
+    /* unable to call initialize() during upgradeToAndCall(), hence had to
         modify sweepFunds instead */
     // function initialize(address sweeper) external initializer {
     //     // Initialize inheritance chain
